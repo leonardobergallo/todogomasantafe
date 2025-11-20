@@ -7,15 +7,21 @@ import Image from 'next/image' // Componente Image optimizado de Next.js
 
 export default async function LatestProducts() {
   // Obtener últimos productos - ordenados por fecha de creación
-  const products = await prisma.product.findMany({
-    take: 8, // Limitar a 8 productos
-    orderBy: {
-      createdAt: 'desc', // Más recientes primero
-    },
-    include: {
-      category: true, // Incluir información de la categoría (JOIN en SQL)
-    },
-  })
+  let products = []
+  try {
+    products = await prisma.product.findMany({
+      take: 8, // Limitar a 8 productos
+      orderBy: {
+        createdAt: 'desc', // Más recientes primero
+      },
+      include: {
+        category: true, // Incluir información de la categoría (JOIN en SQL)
+      },
+    })
+  } catch (error) {
+    console.error('Error al obtener productos:', error)
+    products = []
+  }
 
   // Productos por defecto del sitio original (si no hay en BD)
   const defaultProducts = [

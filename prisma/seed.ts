@@ -1,5 +1,5 @@
 // Script de seed - Poblar la base de datos con datos iniciales
-// Se ejecuta con: npx ts-node prisma/seed.ts
+// Se ejecuta con: npm run db:seed
 
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
@@ -97,6 +97,7 @@ async function main() {
     },
   ]
 
+  // Crear productos
   for (const productData of products) {
     if (productData.categoryId) {
       await prisma.product.upsert({
@@ -104,6 +105,67 @@ async function main() {
         update: {},
         create: productData,
       })
+    }
+  }
+
+  // Crear producto ejemplo: CÁMARAS PARA RUEDAS con variantes (como en el sitio original)
+  console.log('🛞 Creando producto ejemplo: Cámaras para ruedas...')
+  if (ruedasCategory?.id) {
+    const camarasProduct = await prisma.product.upsert({
+      where: { slug: 'camaras-para-ruedas-rodado-4-y-8' },
+      update: {},
+      create: {
+        name: 'CAMARAS PARA RUEDAS RODADO 4 Y 8.',
+        slug: 'camaras-para-ruedas-rodado-4-y-8',
+        description: 'CAMARAS PARA TODOS LOS MODELOS EN RODADO 4 Y 8.',
+        categoryId: ruedasCategory.id,
+        stock: 140, // Stock total (suma de todas las variantes)
+        featured: true,
+      },
+    })
+
+    // Crear variantes de cámaras (exactamente como en el sitio original)
+    const variants = [
+      { code: '9558', diameter: '200', description: '200 x 50 Pico curvo', stock: 20 },
+      { code: '9559', diameter: '220', description: '2.50-4" Pico curvo', stock: 20 },
+      { code: '9560', diameter: '250', description: '3.50-4" Pico curvo', stock: 20 },
+      { code: '9561', diameter: '250', description: '3.50-4" Pico recto', stock: 20 },
+      { code: '9562', diameter: '350', description: '3.00-8" Pico recto', stock: 20 },
+      { code: '9569', diameter: '375', description: '3.50-8" Pico recto', stock: 20 },
+      { code: '9563', diameter: '400', description: '4.00-8" Pico recto', stock: 20 },
+    ]
+
+    console.log('📋 Creando variantes de cámaras...')
+    for (const variantData of variants) {
+      // Buscar si ya existe una variante con este código para este producto
+      const existing = await prisma.productVariant.findFirst({
+        where: {
+          productId: camarasProduct.id,
+          code: variantData.code,
+        },
+      })
+
+      if (!existing) {
+        await prisma.productVariant.create({
+          data: {
+            productId: camarasProduct.id,
+            code: variantData.code,
+            diameter: variantData.diameter,
+            description: variantData.description,
+            stock: variantData.stock,
+          },
+        })
+      } else {
+        // Actualizar si existe
+        await prisma.productVariant.update({
+          where: { id: existing.id },
+          data: {
+            diameter: variantData.diameter,
+            description: variantData.description,
+            stock: variantData.stock,
+          },
+        })
+      }
     }
   }
 

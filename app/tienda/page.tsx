@@ -13,15 +13,21 @@ async function ProductsList({ categorySlug }: { categorySlug?: string }) {
     ? { category: { slug: categorySlug } } // Filtrar por categoría si existe
     : {} // Sin filtros si no hay categoría
 
-  const products = await prisma.product.findMany({
-    where,
-    include: {
-      category: true, // Incluir categoría (JOIN)
-    },
-    orderBy: {
-      createdAt: 'desc', // Más recientes primero
-    },
-  })
+  let products = []
+  try {
+    products = await prisma.product.findMany({
+      where,
+      include: {
+        category: true, // Incluir categoría (JOIN)
+      },
+      orderBy: {
+        createdAt: 'desc', // Más recientes primero
+      },
+    })
+  } catch (error) {
+    console.error('Error al obtener productos:', error)
+    products = []
+  }
 
   if (products.length === 0) {
     return (
@@ -50,10 +56,17 @@ export default async function TiendaPage({
 }: {
   searchParams: { categoria?: string } // Parámetros de búsqueda de la URL
 }) {
-  // Obtener todas las categorías para el filtro
-  const categories = await prisma.category.findMany({
-    orderBy: { name: 'asc' },
-  })
+  // Obtener todas las categorías para el filtro - con manejo de errores
+  let categories = []
+  try {
+    categories = await prisma.category.findMany({
+      orderBy: { name: 'asc' },
+    })
+  } catch (error) {
+    console.error('Error al obtener categorías:', error)
+    // Si hay error, usar categorías por defecto
+    categories = []
+  }
 
   const selectedCategory = searchParams.categoria
 

@@ -10,12 +10,18 @@ import { prisma } from '@/lib/prisma'
 export default async function Categories() {
   // Obtener categorías de la base de datos
   // En JavaScript sería igual, pero TypeScript infiere los tipos automáticamente
-  const categories = await prisma.category.findMany({
-    take: 8, // Limitar a 8 categorías
-    orderBy: {
-      name: 'asc', // Ordenar alfabéticamente
-    },
-  })
+  let categories = []
+  try {
+    categories = await prisma.category.findMany({
+      take: 8, // Limitar a 8 categorías
+      orderBy: {
+        name: 'asc', // Ordenar alfabéticamente
+      },
+    })
+  } catch (error) {
+    console.error('Error al obtener categorías:', error)
+    categories = []
+  }
 
   // Si no hay categorías, mostrar categorías por defecto (hardcoded del sitio original)
   const defaultCategories = [

@@ -15,7 +15,7 @@ const globalForPrisma = globalThis as unknown as {
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    log: ['query'], // Opcional: log de queries para debugging
+    // log: ['query'], // Desactivado temporalmente para evitar spam en consola
   })
 
 // En desarrollo, guardar la instancia en globalThis para reutilizarla

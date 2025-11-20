@@ -1,94 +1,115 @@
 // Componente Header - Barra de navegación principal
-// En React/JavaScript normal sería: export default function Header() { ... }
-// TypeScript añade tipado estático pero la sintaxis es similar
+// Adaptado para incluir sidebar menu como en el sitio original
 
-'use client' // Directiva de Next.js - indica que este componente usa interactividad del cliente
-// Sin esto, Next.js intentaría renderizar en el servidor, pero necesitamos useState/useEffect
+'use client'
 
-import Link from 'next/link' // Componente Link de Next.js (similar a <a> pero con navegación optimizada)
-import { useState } from 'react' // Hook de React para estado local (igual que en JavaScript)
+import Link from 'next/link'
+import { useState, useEffect } from 'react'
+import { Menu, Search } from 'lucide-react'
+import SidebarMenu from './SidebarMenu'
 
 export default function Header() {
-  // useState en TypeScript: TypeScript infiere el tipo automáticamente
-  // En JavaScript sería igual: const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [categories, setCategories] = useState<Array<{ id: string; name: string; slug: string }>>([])
+
+  // Cargar categorías desde la API
+  useEffect(() => {
+    fetch('/api/categories')
+      .then((res) => res.json())
+      .then((data) => setCategories(data))
+      .catch(() => {
+        // Si falla, usar categorías por defecto
+        setCategories([
+          { id: "1", name: "Correas", slug: "correas" },
+          { id: "2", name: "De todo y más", slug: "de-todo-y-mas" },
+          { id: "3", name: "ECOCUR ARGENTINA", slug: "ecocur-argentina" },
+          { id: "4", name: "Herramientas", slug: "herramientas" },
+          { id: "5", name: "Jardin, accesorios y acoples", slug: "jardin-accesorios-acoples" },
+          { id: "6", name: "Mangueras", slug: "mangueras" },
+          { id: "7", name: "Perfiles de goma", slug: "perfiles-goma" },
+          { id: "8", name: "Pisos de goma y PVC.", slug: "pisos-goma-pvc" },
+          { id: "9", name: "Ruedas", slug: "ruedas" },
+        ])
+      })
+  }, [])
 
   return (
-    <header className="bg-white shadow-soft sticky top-0 z-50 border-b border-secondary-darker">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo - replicando exactamente el estilo del sitio original */}
-          <Link href="/" className="text-xl md:text-2xl lg:text-3xl font-bold text-text-primary hover:text-primary transition-colors">
-            <span className="text-primary">Todo</span> <span className="text-text-primary">Goma</span>
+    <>
+      <header className="bg-[#1a2339] text-white py-4 px-6 sticky top-0 z-50">
+        <div className="container mx-auto flex justify-between items-center">
+          {/* Botón de menú - abre sidebar */}
+          <button
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            onClick={() => setIsMenuOpen(true)}
+            aria-label="Abrir menú"
+          >
+            <Menu className="w-5 h-5" />
+            <span className="text-sm font-light uppercase">Menu</span>
+          </button>
+
+          {/* Logo */}
+          <Link href="/">
+            <img
+              src="https://ext.same-assets.com/736435192/906506225.png"
+              alt="TODO GOMA"
+              className="h-8"
+              onError={(e) => {
+                // Fallback si la imagen no carga
+                e.currentTarget.style.display = 'none'
+                e.currentTarget.nextElementSibling?.classList.remove('hidden')
+              }}
+            />
+            <span className="hidden text-xl font-bold">Todo Goma</span>
           </Link>
 
-          {/* Menú Desktop - estilo más parecido al original */}
-          <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
-            <Link href="/" className="text-text-secondary hover:text-primary font-medium transition-colors py-2">
-              Home
-            </Link>
-            <Link href="/tienda" className="text-text-secondary hover:text-primary font-medium transition-colors py-2">
-              Tienda
-            </Link>
-            <Link href="/quienes-somos" className="text-text-secondary hover:text-primary font-medium transition-colors py-2">
-              Quiénes somos
-            </Link>
-            <Link href="/preguntas-frecuentes" className="text-text-secondary hover:text-primary font-medium transition-colors py-2">
-              Preguntas Frecuentes
-            </Link>
-            <Link href="/contacto" className="text-text-secondary hover:text-primary font-medium transition-colors py-2">
-              Contacto
-            </Link>
-          </nav>
-
-          {/* Botón de búsqueda y menú móvil - estilo más profesional */}
-          <div className="flex items-center space-x-3">
-            {/* Botón de búsqueda - replicando el del sitio original */}
-            <button className="p-2 hover:bg-secondary rounded-md transition-colors text-text-secondary hover:text-primary" aria-label="Buscar">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
-
-            {/* Botón de menú móvil */}
-            <button
-              className="md:hidden p-2 hover:bg-secondary rounded-md transition-colors text-text-secondary"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label="Toggle menu"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {isMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
-          </div>
+          {/* Botón de búsqueda */}
+          <button
+            onClick={() => setIsSearchOpen(!isSearchOpen)}
+            className="hover:opacity-80 transition-opacity"
+            aria-label="Buscar"
+          >
+            <Search className="w-5 h-5" />
+          </button>
         </div>
 
-        {/* Menú móvil - estilo mejorado */}
-        {isMenuOpen && (
-          <nav className="md:hidden py-4 border-t border-secondary-darker">
-            <Link href="/" className="block py-3 px-2 text-text-secondary hover:text-primary hover:bg-secondary font-medium transition-colors rounded-md" onClick={() => setIsMenuOpen(false)}>
-              Home
-            </Link>
-            <Link href="/tienda" className="block py-3 px-2 text-text-secondary hover:text-primary hover:bg-secondary font-medium transition-colors rounded-md" onClick={() => setIsMenuOpen(false)}>
-              Tienda
-            </Link>
-            <Link href="/quienes-somos" className="block py-3 px-2 text-text-secondary hover:text-primary hover:bg-secondary font-medium transition-colors rounded-md" onClick={() => setIsMenuOpen(false)}>
-              Quiénes somos
-            </Link>
-            <Link href="/preguntas-frecuentes" className="block py-3 px-2 text-text-secondary hover:text-primary hover:bg-secondary font-medium transition-colors rounded-md" onClick={() => setIsMenuOpen(false)}>
-              Preguntas Frecuentes
-            </Link>
-            <Link href="/contacto" className="block py-3 px-2 text-text-secondary hover:text-primary hover:bg-secondary font-medium transition-colors rounded-md" onClick={() => setIsMenuOpen(false)}>
-              Contacto
-            </Link>
-          </nav>
+        {/* Barra de búsqueda desplegable */}
+        {isSearchOpen && (
+          <div className="mt-4 pb-4">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                const query = (e.currentTarget.querySelector('input') as HTMLInputElement)?.value
+                if (query) {
+                  window.location.href = `/tienda?buscar=${encodeURIComponent(query)}`
+                }
+              }}
+              className="flex gap-2"
+            >
+              <input
+                type="text"
+                placeholder="Buscar por:"
+                className="flex-1 px-4 py-2 rounded text-gray-900"
+                autoFocus
+              />
+              <button
+                type="submit"
+                className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded transition-colors"
+              >
+                Buscar
+              </button>
+            </form>
+          </div>
         )}
-      </div>
-    </header>
+      </header>
+
+      {/* Sidebar Menu */}
+      <SidebarMenu
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        categories={categories}
+      />
+    </>
   )
 }
 

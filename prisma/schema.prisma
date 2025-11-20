@@ -41,12 +41,31 @@ model Product {
   price       Float? // Precio (opcional, algunos productos pueden no tener precio)
   image       String? // URL de la imagen principal
   images      String[] // Array de URLs de imágenes adicionales
-  stock       Int       @default(0) // Cantidad en stock
+  stock       Int       @default(0) // Cantidad en stock total
   featured    Boolean   @default(false) // Si es destacado
   categoryId  String // ID de la categoría
   category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade) // Relación con categoría
+  variants    ProductVariant[] // Variantes del producto (códigos, diámetros, etc.)
+  cartItems   Cart[] // Relación con carrito (un producto puede estar en múltiples carritos)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+}
+
+// Modelo de Variante de Producto - para productos con múltiples códigos/especificaciones
+// Ejemplo: Cámaras con diferentes códigos (9558, 9559) y diámetros
+model ProductVariant {
+  id          String   @id @default(cuid())
+  productId  String // ID del producto padre
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  code        String // Código del producto (ej: "9558", "9559")
+  diameter    String? // Diámetro (ej: "200", "220", "250")
+  description String // Descripción de la variante (ej: "200 x 50 Pico curvo")
+  stock       Int      @default(0) // Stock de esta variante específica
+  price       Float? // Precio específico de la variante (opcional)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([productId, code]) // Un código único por producto
 }
 
 // Modelo de Carrito - para almacenar productos en el carrito de usuarios
