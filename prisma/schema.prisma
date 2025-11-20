@@ -1,0 +1,62 @@
+// Generador de Prisma Client - genera el cliente TypeScript para interactuar con la base de datos
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Configuración de la base de datos - PostgreSQL
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo de Usuario - para autenticación y gestión de usuarios
+model User {
+  id        String   @id @default(cuid()) // ID único generado automáticamente
+  email     String   @unique // Email único para login
+  password  String // Contraseña hasheada (bcrypt)
+  name      String? // Nombre opcional del usuario
+  role      String   @default("USER") // Rol: USER o ADMIN
+  createdAt DateTime @default(now()) // Fecha de creación
+  updatedAt DateTime @updatedAt // Fecha de última actualización
+}
+
+// Modelo de Categoría - para organizar productos (Ruedas, Mangueras, etc.)
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique // Nombre único de la categoría
+  slug        String    @unique // URL amigable (ej: "ruedas")
+  description String? // Descripción opcional
+  image       String? // Imagen de la categoría
+  products    Product[] // Relación: una categoría tiene muchos productos
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// Modelo de Producto - productos del catálogo
+model Product {
+  id          String    @id @default(cuid())
+  name        String // Nombre del producto
+  slug        String    @unique // URL amigable única
+  description String? // Descripción del producto
+  price       Float? // Precio (opcional, algunos productos pueden no tener precio)
+  image       String? // URL de la imagen principal
+  images      String[] // Array de URLs de imágenes adicionales
+  stock       Int       @default(0) // Cantidad en stock
+  featured    Boolean   @default(false) // Si es destacado
+  categoryId  String // ID de la categoría
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade) // Relación con categoría
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// Modelo de Carrito - para almacenar productos en el carrito de usuarios
+model Cart {
+  id        String   @id @default(cuid())
+  userId    String // ID del usuario (puede ser sessionId si no está autenticado)
+  productId String // ID del producto
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade) // Relación con producto
+  quantity  Int      @default(1) // Cantidad del producto
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
