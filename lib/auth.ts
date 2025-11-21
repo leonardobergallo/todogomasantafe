@@ -4,8 +4,19 @@
 
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { prisma } from './prisma'
 import bcrypt from 'bcryptjs'
+
+// Importar prisma de forma lazy para evitar errores durante el build
+// En JavaScript sería igual, pero TypeScript requiere tipado
+let prisma: any = null
+
+async function getPrisma() {
+  if (!prisma) {
+    const { prisma: prismaClient } = await import('./prisma')
+    prisma = prismaClient.prisma
+  }
+  return prisma
+}
 
 // Opciones de configuración de NextAuth
 // TypeScript requiere tipar NextAuthOptions
@@ -20,37 +31,46 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        // Verificar que se proporcionaron credenciales
-        if (!credentials?.email || !credentials?.password) {
+        try {
+          // Verificar que se proporcionaron credenciales
+          if (!credentials?.email || !credentials?.password) {
+            return null
+          }
+
+          // Obtener instancia de Prisma de forma lazy
+          const prismaClient = await getPrisma()
+          
+          // Buscar usuario en la base de datos
+          const user = await prismaClient.user.findUnique({
+            where: { email: credentials.email },
+          })
+
+          if (!user) {
+            return null // Usuario no encontrado
+          }
+
+          // Verificar contraseña - bcrypt compara el hash
+          // En JavaScript sería igual: bcrypt.compare()
+          const isValidPassword = await bcrypt.compare(
+            credentials.password,
+            user.password
+          )
+
+          if (!isValidPassword) {
+            return null // Contraseña incorrecta
+          }
+
+          // Retornar objeto de usuario (se guarda en la sesión)
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          }
+        } catch (error) {
+          // Manejar errores de base de datos o bcrypt
+          console.error('Error en authorize:', error)
           return null
-        }
-
-        // Buscar usuario en la base de datos
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-        })
-
-        if (!user) {
-          return null // Usuario no encontrado
-        }
-
-        // Verificar contraseña - bcrypt compara el hash
-        // En JavaScript sería igual: bcrypt.compare()
-        const isValidPassword = await bcrypt.compare(
-          credentials.password,
-          user.password
-        )
-
-        if (!isValidPassword) {
-          return null // Contraseña incorrecta
-        }
-
-        // Retornar objeto de usuario (se guarda en la sesión)
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
         }
       },
     }),
@@ -83,6 +103,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
   // Agregar secret para JWT - necesario para producción
-  secret: process.env.NEXTAUTH_SECRET,
+  // Si no hay secret, NextAuth usará uno por defecto en desarrollo
+  secret: process.env.NEXTAUTH_SECRET || 'dev-secret-key-change-in-production',
 }
 

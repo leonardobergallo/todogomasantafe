@@ -8,6 +8,9 @@ import { authOptions } from '@/lib/auth'
 // Handler de NextAuth - maneja todas las rutas de autenticación
 // GET /api/auth/signin, POST /api/auth/signin, etc.
 // En Next.js 13+ App Router, necesitamos exportar GET y POST explícitamente
+// Usar dynamic para evitar que se ejecute durante el build
+export const dynamic = 'force-dynamic'
+
 const handler = NextAuth(authOptions)
 
 // Exportar handlers para GET y POST
