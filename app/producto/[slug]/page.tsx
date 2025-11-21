@@ -1,7 +1,6 @@
 // Página de producto individual - Ruta dinámica [slug]
 // Replica el diseño del sitio original con tabla de variantes
 
-import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
@@ -11,21 +10,35 @@ import { MessageCircle, Search } from 'lucide-react'
 import Link from 'next/link'
 import { Prisma } from '@prisma/client'
 
+// Marcar esta página como dinámica para evitar que se ejecute durante el build
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 // Función para generar metadata dinámica (SEO)
 export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const product = await prisma.product.findUnique({
-    where: { slug: params.slug },
-  })
+  try {
+    // Lazy import de Prisma para evitar ejecución durante el build
+    const { prisma } = await import('@/lib/prisma')
+    
+    const product = await prisma.product.findUnique({
+      where: { slug: params.slug },
+    })
 
-  if (!product) {
-    return {
-      title: 'Producto no encontrado',
+    if (!product) {
+      return {
+        title: 'Producto no encontrado',
+      }
     }
-  }
 
-  return {
-    title: `${product.name} - Todo Goma Santa Fe`,
-    description: product.description || `Comprar ${product.name} en Todo Goma Santa Fe`,
+    return {
+      title: `${product.name} - Todo Goma Santa Fe`,
+      description: product.description || `Comprar ${product.name} en Todo Goma Santa Fe`,
+    }
+  } catch (error) {
+    console.error('Error al generar metadata:', error)
+    return {
+      title: 'Producto - Todo Goma Santa Fe',
+    }
   }
 }
 
@@ -34,6 +47,9 @@ export default async function ProductPage({ params }: { params: { slug: string }
   // Buscar producto por slug (URL amigable) con variantes y productos relacionados
   let product = null
   try {
+    // Lazy import de Prisma para evitar ejecución durante el build
+    const { prisma } = await import('@/lib/prisma')
+    
     product = await prisma.product.findUnique({
       where: { slug: params.slug },
       include: {
@@ -63,6 +79,9 @@ export default async function ProductPage({ params }: { params: { slug: string }
   
   let relatedProducts: ProductWithCategory[] = []
   try {
+    // Lazy import de Prisma para evitar ejecución durante el build
+    const { prisma } = await import('@/lib/prisma')
+    
     relatedProducts = await prisma.product.findMany({
       where: {
         categoryId: product.categoryId,
