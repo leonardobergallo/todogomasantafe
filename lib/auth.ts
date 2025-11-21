@@ -8,14 +8,15 @@ import bcrypt from 'bcryptjs'
 
 // Importar prisma de forma lazy para evitar errores durante el build
 // En JavaScript sería igual, pero TypeScript requiere tipado
-let prisma: any = null
-
 async function getPrisma() {
-  if (!prisma) {
-    const { prisma: prismaClient } = await import('./prisma')
-    prisma = prismaClient.prisma
+  try {
+    const { prisma } = await import('./prisma')
+    return prisma
+  } catch (error) {
+    console.error('Error al importar Prisma:', error)
+    // Retornar null si hay error, el authorize manejará esto
+    return null
   }
-  return prisma
 }
 
 // Opciones de configuración de NextAuth
@@ -39,6 +40,12 @@ export const authOptions: NextAuthOptions = {
 
           // Obtener instancia de Prisma de forma lazy
           const prismaClient = await getPrisma()
+          
+          // Si Prisma no está disponible, retornar null
+          if (!prismaClient) {
+            console.error('Prisma no está disponible')
+            return null
+          }
           
           // Buscar usuario en la base de datos
           const user = await prismaClient.user.findUnique({
