@@ -2,7 +2,10 @@
 // Permite obtener productos y crear nuevos (para admin)
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+
+// Marcar esta ruta como dinámica para evitar que se ejecute durante el build
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 // GET - Obtener productos con filtros opcionales
 export async function GET(request: NextRequest) {
@@ -24,6 +27,9 @@ export async function GET(request: NextRequest) {
       where.featured = true
     }
 
+    // Lazy import de Prisma para evitar ejecución durante el build
+    const { prisma } = await import('@/lib/prisma')
+    
     // Obtener productos de la base de datos
     const products = await prisma.product.findMany({
       where,
@@ -49,6 +55,9 @@ export async function GET(request: NextRequest) {
 // POST - Crear nuevo producto (requiere autenticación admin)
 export async function POST(request: NextRequest) {
   try {
+    // Lazy import de Prisma para evitar ejecución durante el build
+    const { prisma } = await import('@/lib/prisma')
+    
     const body = await request.json()
     const { name, description, price, image, categoryId, stock } = body
 

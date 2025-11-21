@@ -4,6 +4,10 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 
+// Marcar esta ruta como dinámica para evitar que se ejecute durante el build
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 // POST handler - maneja solicitudes POST
 // En TypeScript necesitamos tipar los parámetros
 export async function POST(request: NextRequest) {

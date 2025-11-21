@@ -1,11 +1,17 @@
 // API Route para categorías
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+
+// Marcar esta ruta como dinámica para evitar que se ejecute durante el build
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 // GET - Obtener todas las categorías
 export async function GET() {
   try {
+    // Lazy import de Prisma para evitar ejecución durante el build
+    const { prisma } = await import('@/lib/prisma')
+    
     const categories = await prisma.category.findMany({
       orderBy: {
         name: 'asc', // Ordenar alfabéticamente
@@ -30,6 +36,9 @@ export async function GET() {
 // POST - Crear nueva categoría (admin)
 export async function POST(request: NextRequest) {
   try {
+    // Lazy import de Prisma para evitar ejecución durante el build
+    const { prisma } = await import('@/lib/prisma')
+    
     const body = await request.json()
     const { name, description, image } = body
 
