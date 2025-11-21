@@ -65,6 +65,7 @@ export const authOptions: NextAuthOptions = {
     // Callback que se ejecuta cuando se crea/actualiza la sesión
     async jwt({ token, user }) {
       // Agregar información del usuario al token
+      // En JavaScript sería igual, pero TypeScript requiere el cast 'as any' para propiedades personalizadas
       if (user) {
         token.id = user.id
         token.role = (user as any).role
@@ -73,12 +74,15 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       // Agregar información del token a la sesión
-      if (session.user) {
+      // TypeScript requiere el cast 'as any' para agregar propiedades personalizadas
+      if (session.user && token) {
         (session.user as any).id = token.id
         ;(session.user as any).role = token.role
       }
       return session
     },
   },
+  // Agregar secret para JWT - necesario para producción
+  secret: process.env.NEXTAUTH_SECRET,
 }
 
