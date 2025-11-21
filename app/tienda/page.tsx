@@ -4,7 +4,7 @@
 import { prisma } from '@/lib/prisma'
 import ProductCard from '@/components/ProductCard'
 import { Suspense } from 'react'
-import { Prisma } from '@prisma/client'
+import { Prisma, Category } from '@prisma/client'
 
 // Componente para mostrar productos - Server Component
 async function ProductsList({ categorySlug }: { categorySlug?: string }) {
