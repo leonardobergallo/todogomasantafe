@@ -36,8 +36,3 @@ export async function POST(request: Request) {
   const handler = await getNextAuthHandler()
   return handler(request, {} as any)
 }
-
-// Exportar handlers para GET y POST
-// NextAuth maneja automáticamente todas las rutas de autenticación
-export { handler as GET, handler as POST }
-
