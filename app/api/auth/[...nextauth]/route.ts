@@ -5,12 +5,14 @@
 import NextAuth from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
+// Marcar esta ruta como dinámica para evitar que se ejecute durante el build
+// Esto es crítico porque NextAuth intenta conectarse a la base de datos
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 // Handler de NextAuth - maneja todas las rutas de autenticación
 // GET /api/auth/signin, POST /api/auth/signin, etc.
 // En Next.js 13+ App Router, necesitamos exportar GET y POST explícitamente
-// Usar dynamic para evitar que se ejecute durante el build
-export const dynamic = 'force-dynamic'
-
 const handler = NextAuth(authOptions)
 
 // Exportar handlers para GET y POST
