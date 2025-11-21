@@ -3,7 +3,6 @@
 // Aquí usamos async/await para obtener datos del servidor (Next.js Server Component)
 
 import Link from 'next/link'
-import { prisma } from '@/lib/prisma'
 import { Category } from '@prisma/client'
 
 // Función async para obtener categorías - Next.js permite esto en Server Components
@@ -13,6 +12,9 @@ export default async function Categories() {
   // En JavaScript sería igual, pero TypeScript infiere los tipos automáticamente
   let categories: Category[] = []
   try {
+    // Lazy import de Prisma para evitar ejecución durante el build
+    const { prisma } = await import('@/lib/prisma')
+    
     categories = await prisma.category.findMany({
       take: 8, // Limitar a 8 categorías
       orderBy: {

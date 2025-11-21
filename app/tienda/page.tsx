@@ -1,10 +1,13 @@
 // Página de Tienda - Catálogo de productos con filtros
 // En Next.js, esta ruta se crea automáticamente como /tienda
 
-import { prisma } from '@/lib/prisma'
 import ProductCard from '@/components/ProductCard'
 import { Suspense } from 'react'
 import { Prisma, Category } from '@prisma/client'
+
+// Marcar esta página como dinámica para evitar que se ejecute durante el build
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 // Componente para mostrar productos - Server Component
 async function ProductsList({ categorySlug }: { categorySlug?: string }) {
@@ -21,6 +24,9 @@ async function ProductsList({ categorySlug }: { categorySlug?: string }) {
   
   let products: ProductWithCategory[] = []
   try {
+    // Lazy import de Prisma para evitar ejecución durante el build
+    const { prisma } = await import('@/lib/prisma')
+    
     products = await prisma.product.findMany({
       where,
       include: {
@@ -65,6 +71,9 @@ export default async function TiendaPage({
   // Obtener todas las categorías para el filtro - con manejo de errores
   let categories: Category[] = []
   try {
+    // Lazy import de Prisma para evitar ejecución durante el build
+    const { prisma } = await import('@/lib/prisma')
+    
     categories = await prisma.category.findMany({
       orderBy: { name: 'asc' },
     })
