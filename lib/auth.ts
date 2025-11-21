@@ -116,6 +116,11 @@ function getAuthOptions(): NextAuthOptions {
   }
 }
 
+// Exportar función que retorna las opciones (lazy evaluation)
+// Esto evita que se ejecute durante el build
+export const authOptions: NextAuthOptions = getAuthOptions()
+}
+
 // Exportar función que retorna las opciones
 // Esto evita que se ejecute durante el build
 export const authOptions: NextAuthOptions = getAuthOptions()
