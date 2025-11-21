@@ -73,13 +73,13 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
           <div className="text-center text-white px-4">
             <p className="text-2xl md:text-4xl font-light italic">
-              "El lugar,
+              &quot;El lugar,
             </p>
             <p className="text-2xl md:text-4xl font-light italic">
               donde <span className="font-normal">encontrás</span>
             </p>
             <p className="text-2xl md:text-4xl font-light italic">
-              todo lo que <span className="font-normal">buscás</span>"
+              todo lo que <span className="font-normal">buscás</span>&quot;
             </p>
           </div>
         </div>
