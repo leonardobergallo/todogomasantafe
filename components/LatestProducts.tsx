@@ -4,10 +4,16 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import Image from 'next/image' // Componente Image optimizado de Next.js
+import { Prisma } from '@prisma/client'
 
 export default async function LatestProducts() {
   // Obtener últimos productos - ordenados por fecha de creación
-  let products = []
+  // Tipo explícito para TypeScript - incluye la categoría relacionada
+  type ProductWithCategory = Prisma.ProductGetPayload<{
+    include: { category: true }
+  }>
+  
+  let products: ProductWithCategory[] = []
   try {
     products = await prisma.product.findMany({
       take: 8, // Limitar a 8 productos

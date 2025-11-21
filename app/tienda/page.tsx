@@ -4,6 +4,7 @@
 import { prisma } from '@/lib/prisma'
 import ProductCard from '@/components/ProductCard'
 import { Suspense } from 'react'
+import { Prisma } from '@prisma/client'
 
 // Componente para mostrar productos - Server Component
 async function ProductsList({ categorySlug }: { categorySlug?: string }) {
@@ -13,7 +14,12 @@ async function ProductsList({ categorySlug }: { categorySlug?: string }) {
     ? { category: { slug: categorySlug } } // Filtrar por categoría si existe
     : {} // Sin filtros si no hay categoría
 
-  let products = []
+  // Tipo explícito para TypeScript - incluye la categoría relacionada
+  type ProductWithCategory = Prisma.ProductGetPayload<{
+    include: { category: true }
+  }>
+  
+  let products: ProductWithCategory[] = []
   try {
     products = await prisma.product.findMany({
       where,
@@ -57,7 +63,7 @@ export default async function TiendaPage({
   searchParams: { categoria?: string } // Parámetros de búsqueda de la URL
 }) {
   // Obtener todas las categorías para el filtro - con manejo de errores
-  let categories = []
+  let categories: Category[] = []
   try {
     categories = await prisma.category.findMany({
       orderBy: { name: 'asc' },

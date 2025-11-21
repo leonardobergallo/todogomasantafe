@@ -4,13 +4,14 @@
 
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
+import { Category } from '@prisma/client'
 
 // Función async para obtener categorías - Next.js permite esto en Server Components
 // En React normal necesitarías useEffect y useState, aquí lo hacemos directamente
 export default async function Categories() {
   // Obtener categorías de la base de datos
   // En JavaScript sería igual, pero TypeScript infiere los tipos automáticamente
-  let categories = []
+  let categories: Category[] = []
   try {
     categories = await prisma.category.findMany({
       take: 8, // Limitar a 8 categorías
