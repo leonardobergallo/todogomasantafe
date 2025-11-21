@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card'
 import Calculator from '@/components/Calculator'
 import { MessageCircle, Search } from 'lucide-react'
 import Link from 'next/link'
+import { Prisma } from '@prisma/client'
 
 // Función para generar metadata dinámica (SEO)
 export async function generateMetadata({ params }: { params: { slug: string } }) {
@@ -55,7 +56,12 @@ export default async function ProductPage({ params }: { params: { slug: string }
   }
 
   // Obtener productos relacionados (misma categoría, excluyendo el actual)
-  let relatedProducts = []
+  // Tipo explícito para TypeScript - incluye la categoría relacionada
+  type ProductWithCategory = Prisma.ProductGetPayload<{
+    include: { category: true }
+  }>
+  
+  let relatedProducts: ProductWithCategory[] = []
   try {
     relatedProducts = await prisma.product.findMany({
       where: {
