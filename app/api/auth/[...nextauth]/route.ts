@@ -13,7 +13,21 @@ export const runtime = 'nodejs'
 // Handler de NextAuth - maneja todas las rutas de autenticación
 // GET /api/auth/signin, POST /api/auth/signin, etc.
 // En Next.js 13+ App Router, necesitamos exportar GET y POST explícitamente
-const handler = NextAuth(authOptions)
+// Lazy initialization para evitar ejecución durante el build
+const getHandler = () => NextAuth(authOptions)
+
+// Exportar handlers para GET y POST
+async function GET(request: Request) {
+  const handler = getHandler()
+  return handler(request, {} as any)
+}
+
+async function POST(request: Request) {
+  const handler = getHandler()
+  return handler(request, {} as any)
+}
+
+export { GET, POST }
 
 // Exportar handlers para GET y POST
 // NextAuth maneja automáticamente todas las rutas de autenticación

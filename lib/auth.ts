@@ -19,9 +19,10 @@ async function getPrisma() {
   }
 }
 
-// Opciones de configuración de NextAuth
-// TypeScript requiere tipar NextAuthOptions
-export const authOptions: NextAuthOptions = {
+// Función para obtener las opciones de NextAuth de forma lazy
+// Esto evita que se ejecute durante el build
+function getAuthOptions(): NextAuthOptions {
+  return {
   providers: [
     // Proveedor de credenciales (email/password)
     // Similar a configurar un login tradicional
@@ -109,8 +110,13 @@ export const authOptions: NextAuthOptions = {
       return session
     },
   },
-  // Agregar secret para JWT - necesario para producción
-  // Si no hay secret, NextAuth usará uno por defecto en desarrollo
-  secret: process.env.NEXTAUTH_SECRET || 'dev-secret-key-change-in-production',
+    // Agregar secret para JWT - necesario para producción
+    // Si no hay secret, NextAuth usará uno por defecto en desarrollo
+    secret: process.env.NEXTAUTH_SECRET || 'dev-secret-key-change-in-production',
+  }
 }
+
+// Exportar función que retorna las opciones
+// Esto evita que se ejecute durante el build
+export const authOptions: NextAuthOptions = getAuthOptions()
 
