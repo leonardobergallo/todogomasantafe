@@ -15,6 +15,9 @@ export default async function LatestProducts() {
   
   let products: ProductWithCategory[] = []
   try {
+    // Lazy import de Prisma para evitar ejecución durante el build
+    const { prisma } = await import('@/lib/prisma')
+    
     products = await prisma.product.findMany({
       take: 8, // Limitar a 8 productos
       orderBy: {
